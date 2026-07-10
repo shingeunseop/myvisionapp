@@ -3,12 +3,13 @@ from PIL import Image
 from ultralytics import YOLO
 import numpy as np
 import google.generativeai as genai
+import time
 
 # 페이지 기본 설정
 st.set_page_config(page_title="YOLO 객체 탐지", layout="wide")
 st.title("YOLO 객체 탐지기")
 
-# --- 1. 유틸리티 함수: 이미지 최적화 (속도 향상) ---
+# --- 1. 유틸리티 함수 ---
 def resize_image(image):
     max_size = 1024
     if max(image.size) > max_size:
@@ -99,23 +100,28 @@ if uploaded_file is not None:
                 if st.session_state.interpret_clicked:
                     if not st.session_state.gemini_result:
                         with st.spinner("분석 중..."):
-                            try:
-                                genai.configure(api_key=gemini_api_key)
-                                # 코드 내 모델 호출 부분 수정
-                                # 현재 2.0 모델이 가장 안정적입니다.
-                                 model_gemini = genai.GenerativeModel('gemini-2.0-flash')
-                                
-                                # 속도 최적화: 이미지 리사이징 후 전달
-                                optimized_img = resize_image(image)
-                                prompt = f"다음은 객체 탐지 결과입니다: {st.session_state.yolo_results['data']}. 상황을 설명해주세요."
-                                
-                                response = model_gemini.generate_content(
-                                    [prompt, optimized_img],
-                                    generation_config=genai.types.GenerationConfig(max_output_tokens=300)
-                                )
-                                st.session_state.gemini_result = response.text
-                            except Exception as e:
-                                st.error(f"오류 발생: {e}")
+                            genai.configure(api_key=gemini_api_key)
+                            # 안정적인 모델명 사용
+                            model_gemini = genai.GenerativeModel('gemini-1.5-flash')
+                            
+                            optimized_img = resize_image(image)
+                            prompt = f"다음은 객체 탐지 결과입니다: {st.session_state.yolo_results['data']}. 상황을 설명해주세요."
+                            
+                            # 재시도 로직 (지수 백오프)
+                            for attempt in range(3):
+                                try:
+                                    response = model_gemini.generate_content(
+                                        [prompt, optimized_img],
+                                        generation_config=genai.types.GenerationConfig(max_output_tokens=300)
+                                    )
+                                    st.session_state.gemini_result = response.text
+                                    break
+                                except Exception as e:
+                                    if "429" in str(e) and attempt < 2:
+                                        time.sleep(2 ** attempt + 1)
+                                    else:
+                                        st.error(f"오류 발생: {e}")
+                                        break
                     
                     if st.session_state.gemini_result:
                         st.info(st.session_state.gemini_result)

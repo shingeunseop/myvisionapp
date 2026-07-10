@@ -101,7 +101,9 @@ if uploaded_file is not None:
                         with st.spinner("분석 중..."):
                             try:
                                 genai.configure(api_key=gemini_api_key)
-                                model_gemini = genai.GenerativeModel('gemini-1.5-flash-latest') # 모델명 확인
+                                # 코드 내 모델 호출 부분 수정
+                                # 성능이 더 좋은 2.0 버전으로 변경
+                                model_gemini = genai.GenerativeModel('gemini-2.0-flash') # 모델명 확인
                                 
                                 # 속도 최적화: 이미지 리사이징 후 전달
                                 optimized_img = resize_image(image)

@@ -2,3 +2,4 @@ streamlit
 ultralytics
 pillow
 pandas
+opencv-python-headless

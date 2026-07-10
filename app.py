@@ -102,7 +102,7 @@ if uploaded_file is not None:
                         with st.spinner("분석 중..."):
                             genai.configure(api_key=gemini_api_key)
                             # 안정적인 모델명 사용
-                            model_gemini = genai.GenerativeModel('gemini-1.5-flash')
+                            model_gemini = genai.GenerativeModel('gemini-2.0-flash')
                             
                             optimized_img = resize_image(image)
                             prompt = f"다음은 객체 탐지 결과입니다: {st.session_state.yolo_results['data']}. 상황을 설명해주세요."

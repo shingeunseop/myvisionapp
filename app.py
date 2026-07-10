@@ -102,8 +102,8 @@ if uploaded_file is not None:
                             try:
                                 genai.configure(api_key=gemini_api_key)
                                 # 코드 내 모델 호출 부분 수정
-                                # 현재 3.5 모델이 가장 안정적입니다.
-                                 model_gemini = genai.GenerativeModel('gemini-3.5-flash')
+                                # 현재 2.0 모델이 가장 안정적입니다.
+                                 model_gemini = genai.GenerativeModel('gemini-2.0-flash')
                                 
                                 # 속도 최적화: 이미지 리사이징 후 전달
                                 optimized_img = resize_image(image)

@@ -8,18 +8,10 @@ import google.generativeai as genai
 st.set_page_config(page_title="YOLO 객체 탐지", layout="wide")
 st.title("YOLO 객체 탐지기")
 
-# --- Gemini API 설정 (보안 환경 연동) ---
+# --- Gemini API 설정 (화면 로드 후 직접 입력) ---
 st.sidebar.header("🤖 Gemini API 설정")
-
-# 1. Streamlit Secrets(환경 변수)에 키가 있는지 먼저 확인
-if "GEMINI_API_KEY" in st.secrets:
-    gemini_api_key = st.secrets["GEMINI_API_KEY"]
-    st.sidebar.success("✅ 시스템(Secrets)에 안전하게 설정된 API Key를 사용합니다.")
-else:
-    # 2. 없으면 사용자에게 직접 입력 받기
-    gemini_api_key = st.sidebar.text_input("Gemini API Key를 입력하세요", type="password")
-    st.sidebar.markdown("*(API Key가 있어야 결과 해석 기능이 동작합니다.)*")
-
+gemini_api_key = st.sidebar.text_input("Gemini API Key를 입력하세요", type="password")
+st.sidebar.markdown("*(API Key가 있어야 결과 해석 기능이 동작합니다.)*")
 st.sidebar.divider()
 
 # 1. 모델 로드 (캐싱하여 재로딩 방지)
@@ -53,7 +45,7 @@ if uploaded_file is not None:
 
     if st.sidebar.button("탐지 실행"):
         with st.spinner("이미지를 분석하고 있습니다..."):
-            # 3. 모델 예측 (파일 경로 대신 PIL 객체 직접 전달)
+            # 3. 모델 예측
             results = model.predict(source=image, conf=conf_threshold)
             r = results[0]
             
@@ -91,12 +83,14 @@ if uploaded_file is not None:
                 st.write("---")
                 st.subheader("💡 Gemini AI 결과 해석")
                 
+                # API 키가 입력되지 않았을 경우 경고 문구 출력
                 if not gemini_api_key:
-                    st.warning("결과를 해석하려면 왼쪽 사이드바에 Gemini API Key를 입력하거나 Secrets에 설정해주세요.")
+                    st.warning("결과를 해석하려면 왼쪽 사이드바에 Gemini API Key를 입력해주세요.")
                 else:
                     if st.button("결과 해석 요청하기"):
                         with st.spinner("Gemini가 탐지 결과를 바탕으로 상황을 분석 중입니다..."):
                             try:
+                                # 화면에서 입력받은 API 키로 설정
                                 genai.configure(api_key=gemini_api_key)
                                 gemini_model = genai.GenerativeModel('gemini-1.5-flash')
                                 

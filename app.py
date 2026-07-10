@@ -139,7 +139,7 @@ if uploaded_file is not None:
                             with st.spinner("Gemini가 탐지 결과를 바탕으로 상황을 분석 중입니다..."):
                                 try:
                                     genai.configure(api_key=gemini_api_key)
-                                    gemini_model = genai.GenerativeModel('gemini-2.5-flash')
+                                    gemini_model = genai.GenerativeModel('gemini-3.5-flash')
                                     
                                     detected_summary = ", ".join([f"{item['클래스명']}({item['정확도(Conf)']})" for item in st.session_state.yolo_results["data"]])
                                     
